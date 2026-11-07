@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#050a18" />
+<title>Eclipse System: The Last Awakened</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="640" height="360" aria-label="Game world"></canvas>
+  <div id="cinematic-bars" class="hidden"><span></span><span></span></div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-player panel-edge">
+      <div class="portrait-wrap">
+        <canvas id="hud-portrait" width="48" height="56"></canvas>
+        <div class="level-badge"><span>LV</span><b id="hud-level">1</b></div>
+      </div>
+      <div class="hud-vitals">
+        <div class="hud-name-row">
+          <span id="hud-name">Unnamed</span>
+          <small id="hud-title">The Awakened</small>
+        </div>
+        <div class="bar hp"><i id="bar-hp"></i><em id="txt-hp">100 / 100</em></div>
+        <div class="bar mp"><i id="bar-mp"></i><em id="txt-mp">50 / 50</em></div>
+        <div class="bar sp"><i id="bar-sp"></i><em id="txt-sp">100</em></div>
+        <div class="bar xp"><i id="bar-xp"></i><em id="txt-xp">0 / 100 XP</em></div>
+      </div>
+    </div>
+
+    <div class="hud-top-right">
+      <div class="world-clock panel-edge">
+        <div class="clock-main"><span id="hud-time">21:04</span><b id="hud-day">DAY 1</b></div>
+        <div class="clock-sub"><span id="hud-weather">CLEAR</span><span id="hud-zone">HOLLOWMERE</span></div>
+      </div>
+      <div class="minimap-wrap panel-edge">
+        <canvas id="minimap" width="150" height="112"></canvas>
+        <div class="mini-frame"></div>
+        <span class="mini-label" id="mini-label">HOLLOWMERE</span>
+      </div>
+    </div>
+
+    <div class="hud-quest panel-edge" id="hud-quest">
+      <div class="hud-quest-head"><span>◆ QUEST LOG</span><button id="quest-collapse" aria-label="Collapse quest">–</button></div>
+      <div class="hud-quest-body">
+        <b id="quest-name">A System Awakens</b>
+        <p id="quest-objective">Speak with Elder Orin in Hollowmere.</p>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="combo-meter" id="combo-meter"><b id="combo-count">0</b><span>COMBO</span></div>
+      <div class="interact-prompt hidden" id="interact-prompt"><kbd>E</kbd><span id="interact-text">Talk</span></div>
+      <div class="ability-bar" id="ability-bar">
+        <button class="ability-slot" data-skill="0" id="slot-0">
+          <span class="slot-key">Q</span><i class="cooldown" id="cd-0"></i><b class="slot-icon" id="icon-0">✦</b><small id="sname-0">Skill</small>
+        </button>
+        <button class="ability-slot" data-skill="1" id="slot-1">
+          <span class="slot-key">E</span><i class="cooldown" id="cd-1"></i><b class="slot-icon" id="icon-1">✦</b><small id="sname-1">Skill</small>
+        </button>
+        <button class="ability-slot" data-skill="2" id="slot-2">
+          <span class="slot-key">R</span><i class="cooldown" id="cd-2"></i><b class="slot-icon" id="icon-2">✦</b><small id="sname-2">Skill</small>
+        </button>
+        <div class="ability-divider"></div>
+        <button class="ability-slot potion" id="slot-potion">
+          <span class="slot-key">H</span><b class="slot-icon">✚</b><small id="potion-count">3</small>
+        </button>
+        <button class="ability-slot potion" id="slot-mana">
+          <span class="slot-key">J</span><b class="slot-icon">◈</b><small id="mana-count">2</small>
+        </button>
+      </div>
+      <div class="hud-controls" id="hud-controls">
+        <span><b>WASD</b> move</span><span><b>LMB</b> attack</span><span><b>RMB</b> heavy</span><span><b>SPACE</b> dodge</span><span><b>TAB</b> system</span>
+      </div>
+    </div>
+
+    <button id="system-btn" class="system-btn panel-edge" aria-label="Open System"><span>◈</span><b>SYSTEM</b><kbd>TAB</kbd></button>
+    <div class="hud-gold panel-edge"><span>◉</span><b id="hud-gold">0</b></div>
+    <div class="player-aura" id="player-aura"></div>
+  </div>
+
+  <!-- TITLE -->
+  <div id="title-screen" class="screen">
+    <div class="title-glow"></div>
+    <div class="title-content">
+      <div class="eyebrow"><span></span> A DARK FANTASY ACTION RPG <span></span></div>
+      <h1 class="game-title">
+        <span class="title-small">ECLIPSE SYSTEM</span>
+        <span class="title-big">THE LAST<br>A<span class="eclipse-mark">◉</span>WAKENED</span>
+      </h1>
+      <p class="title-tagline">The sky went dark. The world kept breathing. Something inside you woke up.</p>
+      <nav class="title-menu">
+        <button id="btn-new" class="menu-btn primary"><span class="mb-icon">◈</span><span><b>BEGIN AWAKENING</b><small>Forge a new fate</small></span></button>
+        <button id="btn-continue" class="menu-btn"><span class="mb-icon">▷</span><span><b>CONTINUE</b><small id="continue-label">No record found</small></span></button>
+        <button id="btn-how" class="menu-btn"><span class="mb-icon">?</span><span><b>HOW TO PLAY</b><small>Controls & systems</small></span></button>
+      </nav>
+      <div class="title-footer"><span>v1.0</span><span>RANDOM AWAKENING PROTOCOL</span><span>HEADPHONES RECOMMENDED</span></div>
+    </div>
+    <div class="title-stats" id="title-stats"></div>
+  </div>
+
+  <!-- CHARACTER CREATION -->
+  <div id="creation-screen" class="screen hidden">
+    <div class="creation-wrap">
+      <div class="creation-head">
+        <div>
+          <div class="eyebrow"><span></span> SOUL REGISTRATION <span></span></div>
+          <h2>WHO WALKS BENEATH THE ECLIPSE?</h2>
+        </div>
+        <button id="creation-back" class="ghost-btn">← RETURN</button>
+      </div>
+      <div class="creation-body">
+        <div class="creation-preview">
+          <div class="preview-frame">
+            <div class="preview-bg"></div>
+            <canvas id="preview-canvas" width="190" height="250"></canvas>
+            <div class="preview-runes">ᚱ ᛟ ᚾ ᚨ</div>
+          </div>
+          <div class="preview-desc">
+            <b id="preview-name">UNNAMED</b>
+            <span id="preview-path">PATH OF THE BLADE</span>
+            <p>A blank soul. The System will choose what you become.</p>
+          </div>
+        </div>
+        <div class="creation-options">
+          <label class="field-label" for="char-name">TRUE NAME</label>
+          <div class="name-row">
+            <input id="char-name" maxlength="16" placeholder="Enter a name" autocomplete="off" spellcheck="false" />
+            <button id="btn-random-name" title="Random name">⟳</button>
+          </div>
+
+          <label class="field-label">HAIR</label>
+          <div class="option-row" id="hair-options">
+            <button data-hair="0" class="swatch-btn active">Shorn</button>
+            <button data-hair="1" class="swatch-btn">Nomad</button>
+            <button data-hair="2" class="swatch-btn">Raven</button>
+            <button data-hair="3" class="swatch-btn">Veiled</button>
+          </div>
+
+          <label class="field-label">HAIR COLOR</label>
+          <div class="color-row" id="hair-color-options">
+            <button data-color="#2b2533" style="--c:#2b2533" class="color-btn active" title="Ink"></button>
+            <button data-color="#6b3a2a" style="--c:#6b3a2a" class="color-btn" title="Chestnut"></button>
+            <button data-color="#c9c2b8" style="--c:#c9c2b8" class="color-btn" title="Ash"></button>
+            <button data-color="#7f2d2d" style="--c:#7f2d2d" class="color-btn" title="Ember"></button>
+            <button data-color="#2f4c72" style="--c:#2f4c72" class="color-btn" title="Dusk"></button>
+            <button data-color="#4b3268" style="--c:#4b3268" class="color-btn" title="Violet"></button>
+          </div>
+
+          <label class="field-label">CLOAK</label>
+          <div class="color-row" id="cloak-color-options">
+            <button data-color="#25324d" style="--c:#25324d" class="color-btn active" title="Midnight"></button>
+            <button data-color="#3d2a24" style="--c:#3d2a24" class="color-btn" title="Leather"></button>
+            <button data-color="#2c4636" style="--c:#2c4636" class="color-btn" title="Moss"></button>
+            <button data-color="#4a2436" style="--c:#4a2436" class="color-btn" title="Wine"></button>
+            <button data-color="#222222" style="--c:#222222" class="color-btn" title="Onyx"></button>
+            <button data-color="#5a4a2a" style="--c:#5a4a2a" class="color-btn" title="Ochre"></button>
+          </div>
+
+          <label class="field-label">STARTING PATH</label>
+          <div class="path-grid" id="path-options">
+            <button data-path="sword" class="path-btn active"><span>⚔</span><b>BLADE</b><small>Sword · balanced</small></button>
+            <button data-path="bow" class="path-btn"><span>➶</span><b>HUNTER</b><small>Bow · ranged</small></button>
+            <button data-path="staff" class="path-btn"><span>✧</span><b>ARCANIST</b><small>Staff · magic</small></button>
+          </div>
+
+          <div class="creation-note"><span>◈</span><p>Your first ability is chosen by the System. Rarity and power cannot be selected. That is the price of awakening.</p></div>
+          <button id="btn-begin" class="primary-cta">ENTER THE ECLIPSE <span>→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIALOGUE -->
+  <div id="dialogue-layer" class="hidden">
+    <div class="dialogue-box">
+      <div class="dialogue-portrait"><canvas id="dialogue-portrait" width="64" height="72"></canvas></div>
+      <div class="dialogue-content">
+        <div class="dialogue-speaker" id="dialogue-speaker">Elder Orin</div>
+        <p id="dialogue-text"></p>
+        <div class="dialogue-choices" id="dialogue-choices"></div>
+      </div>
+      <div class="dialogue-next" id="dialogue-next">▼</div>
+    </div>
+  </div>
+
+  <!-- AWAKENING -->
+  <div id="awakening-screen" class="hidden">
+    <div class="awakening-backdrop"></div>
+    <div class="awakening-content">
+      <div class="system-message">
+        <div class="sys-tag">[SYSTEM]</div>
+        <p>Congratulations, <b id="awaken-name">Player</b>.</p>
+        <p>Your awakening has been completed.</p>
+        <p class="dim">Scanning soul lattice... assigning unique authority...</p>
+      </div>
+      <div class="ability-reveal" id="ability-reveal">
+        <div class="reveal-ring"></div>
+        <div class="reveal-rarity" id="reveal-rarity">RARE</div>
+        <div class="reveal-sigil" id="reveal-sigil">✦</div>
+        <h2 id="reveal-name">Spatial Slash</h2>
+        <p class="reveal-desc" id="reveal-desc"></p>
+        <div class="reveal-stats" id="reveal-stats"></div>
+        <div class="reveal-passive" id="reveal-passive"></div>
+        <div class="reveal-skills" id="reveal-skills"></div>
+        <p class="reveal-final">Your journey begins now.</p>
+        <button id="btn-accept-awakening" class="primary-cta">ACCEPT YOUR AUTHORITY <span>→</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYSTEM OVERLAY -->
+  <div id="system-overlay" class="hidden">
+    <div class="sys-frame">
+      <aside class="sys-side">
+        <div class="sys-brand">
+          <div class="sys-brand-mark">◈</div>
+          <div><b>ECLIPSE</b><span>SYSTEM v.09</span></div>
+        </div>
+        <div class="sys-player-mini">
+          <canvas id="sys-portrait" width="40" height="46"></canvas>
+          <div><b id="sys-mini-name">Unnamed</b><span id="sys-mini-level">LV 1 · AWAKENED</span></div>
+        </div>
+        <nav class="sys-tabs" id="sys-tabs">
+          <button data-tab="status" class="active"><i>◉</i><span>STATUS</span><kbd>1</kbd></button>
+          <button data-tab="skills"><i>✦</i><span>SKILLS</span><kbd>2</kbd></button>
+          <button data-tab="inventory"><i>▣</i><span>INVENTORY</span><kbd>3</kbd></button>
+          <button data-tab="equipment"><i>⚔</i><span>EQUIPMENT</span><kbd>4</kbd></button>
+          <button data-tab="quest"><i>◆</i><span>QUEST</span><kbd>5</kbd></button>
+          <button data-tab="dungeon"><i>⌂</i><span>DUNGEON</span><kbd>6</kbd></button>
+          <button data-tab="bestiary"><i>☠</i><span>BESTIARY</span><kbd>7</kbd></button>
+          <button data-tab="achievements"><i>★</i><span>ACHIEVEMENTS</span><kbd>8</kbd></button>
+          <button data-tab="map"><i>▤</i><span>MAP</span><kbd>9</kbd></button>
+          <button data-tab="settings"><i>⚙</i><span>SETTINGS</span><kbd>0</kbd></button>
+        </nav>
+        <div class="sys-side-foot">
+          <div class="sys-latency"><span>SOUL LINK</span><i></i></div>
+          <div id="sys-clock">21:04 · HOLLOWMERE</div>
+        </div>
+      </aside>
+      <main class="sys-main">
+        <header class="sys-header">
+          <div><span class="sys-header-kicker" id="sys-kicker">SYSTEM / STATUS</span><h2 id="sys-title">STATUS</h2></div>
+          <div class="sys-header-right"><span id="sys-gold">◉ 0</span><button id="sys-close" aria-label="Close system">✕ <kbd>ESC</kbd></button></div>
+        </header>
+        <div class="sys-body" id="sys-content"></div>
+      </main>
+    </div>
+    <div class="sys-bg-scan"></div>
+  </div>
+
+  <!-- ITEM DETAIL / MODAL -->
+  <div id="modal-layer" class="hidden">
+    <div class="modal-card" id="modal-card"></div>
+  </div>
+
+  <!-- TOASTS -->
+  <div id="toast-layer"></div>
+
+  <!-- MOBILE CONTROLS -->
+  <div id="touch-controls" class="hidden">
+    <div class="joystick" id="joystick"><div class="stick" id="stick"></div></div>
+    <div class="touch-actions">
+      <button class="t-btn attack" data-action="attack">⚔<span>ATK</span></button>
+      <button class="t-btn dodge" data-action="dodge">➤<span>DODGE</span></button>
+      <button class="t-btn skill" data-action="skill0">✦<span>Q</span></button>
+      <button class="t-btn skill" data-action="skill1">✦<span>E</span></button>
+      <button class="t-btn skill" data-action="skill2">✦<span>R</span></button>
+      <button class="t-btn potion" data-action="potion">✚</button>
+      <button class="t-btn interact" data-action="interact">◎<span>USE</span></button>
+    </div>
+  </div>
+
+  <div id="loading-screen">
+    <div class="load-mark">◈</div>
+    <div class="load-title">ECLIPSE SYSTEM</div>
+    <div class="load-bar"><i></i></div>
+    <div class="load-sub">initializing soul lattice</div>
+  </div>
+  <div id="ending-screen" class="hidden"></div>
+  <div id="damage-vignette"></div>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
